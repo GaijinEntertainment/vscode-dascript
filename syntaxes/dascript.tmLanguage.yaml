@@ -200,7 +200,7 @@ repository:
                 - include: '#keyword_arguments'
                 - include: $self
   annotated_arguments:
-    begin: \b([[:alpha:]_][[:alnum:]_\,]*)\s*(:)|(?=\()
+    begin: \b([[:alpha:]_][[:alnum:]_\,\ ]*)\s*(:)|(?=\()
     beginCaptures:
       1: {name: variable.parameter.function.dascript}
       2: {name: punctuation.separator.annotation.dascript}
