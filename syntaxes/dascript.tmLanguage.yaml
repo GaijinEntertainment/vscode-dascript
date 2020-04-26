@@ -71,8 +71,19 @@ repository:
         begin: '"'
         end: '"'
         patterns:
-          - name: constant.character.escape.dascript
-            match: \\.
+        - name: constant.character.escape.dascript
+          match: \\{
+        - begin: (\{)
+          beginCaptures:
+            '0': {name: punctuation.definition.block.begin.dascript}
+          end: (})
+          endCaptures:
+            '0': {name: punctuation.definition.block.end.dascript}
+          patterns:
+          - include: $self
+          - include: '#identifiers'
+        - name: constant.character.escape.dascript
+          match: \\.
       - name: string.quoted.single.dascript
         begin: "'"
         end: "'"
@@ -95,6 +106,12 @@ repository:
       - name: comment.block
         begin: (\/\*)
         end: (\*\/)
+  identifiers:
+    patterns:
+    - include: '#parameter_name'
+  parameter_name:
+    match: '\b([_A-Za-z]\w*)\b'
+    name: variable.parameter.dascript
   generic_names:
     name: meta.identifier.dascript
     match: '[[:alpha:]_][[:alnum:]_]*'
