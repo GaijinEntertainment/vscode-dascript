@@ -105,7 +105,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(struct|def|\\$|recover|let|var|continue|break|finally|new|delete|enum|enum|for|while|if|else|elif|options|null|return|typeinfo|this|cast|upcast|reinterpret|operator|in|scope|require|typedef|with|override|type|expect|auto|include|where)\\b",
+          "match": "\\b(\\$|struct|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|scope|typedef|with|cast|override|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|shared)\\b",
           "name": "keyword.control.dascript"
         },
         {
@@ -248,15 +248,15 @@
     },
     "builtin_types": {
       "name": "support.type.dascript",
-      "match": "(?x) (?<!\\.) \\b( bool | buffer | bytearray | bytes | complex | dict | float | frozenset | int | list | long | memoryview | object | property | range | set | slice | str | tuple | type | unicode | xrange | string | int | uint | float | bool | double | int64 | uint64 | int2 | int3 | int4 | uint2 | uint3 | uint4 | float2 | float3 | float4 | int8, uint8, int16, uint16) \\b(?!(\\s*\\())"
+      "match": "(?x) (?<!\\.) \\b( bool | void | string | auto | int | int2 | int3 | int4 | uint | uint2 | uint3 | uint4 | float | float2 | float3 | float4 | range | urange | block | int64 | uint64 | double | function | lambda | int8 | uint8 | int16 | uint16 | tuple | variant | generator | yield) \\b(?!(\\s*\\())"
     },
     "builtin_functions_name": {
       "name": "support.function.builtin.name.dascript",
-      "match": "(?x) (?<!\\.|@)\\b( print | deref | addr | assert | invoke | panic | stackwalk | terminate | breakpoint | heap_bytes_allocated | verify | static_assert | debug | push | emplace | resize | erase | length | clear | capacity | key_exists | find) \\b\\s*(?!(\\())"
+      "match": "(?x) (?<!\\.|@)\\b( deref | addr | panic | print | terminate | stackwalk | breakpoint | assert | verify | static_assert | concept_assert | debug | memzero | invoke | push | emplace | resize | erase | length | clear | capacity | key_exists | find) \\b\\s*(?!(\\())"
     },
     "builtin_functions_call": {
       "name": "meta.function-call.dascript",
-      "begin": "(?x) (?<!\\.)\\b( print | deref | addr | assert | invoke | panic | stackwalk | terminate | breakpoint | heap_bytes_allocated | verify | static_assert | debug | push | emplace | resize | erase | length | clear | capacity | key_exists | find) \\b\\s*(?=\\()",
+      "begin": "(?x) (?<!\\.)\\b( deref | addr | panic | print | terminate | stackwalk | breakpoint | assert | verify | static_assert | concept_assert | debug | memzero | invoke | push | emplace | resize | erase | length | clear | capacity | key_exists | find) \\b\\s*(?=\\()",
       "beginCaptures": {
         "1": {
           "name": "support.function.builtin.call.dascript"
