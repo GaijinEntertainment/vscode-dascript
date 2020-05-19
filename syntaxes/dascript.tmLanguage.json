@@ -77,11 +77,15 @@
           "name": "constant.numeric.complex.dascript"
         },
         {
-          "match": "\\b(?i:(\\d+\\.\\d*(e[\\-\\+]?\\d+)?))(?=[^[:alpha:]_])",
+          "match": "\\b(?i:(\\d+\\.\\d*(e[\\-\\+]?\\d+)?)F?)(?=[^[:alpha:]_])",
           "name": "constant.numeric.float.dascript"
         },
         {
-          "match": "(?<=[^[:alnum:]_])(?i:(\\.\\d+(e[\\-\\+]?\\d+)?))",
+          "match": "\\b(?i:(\\d+(e[\\-\\+]?\\d+)?)F?)(?=[^[:alpha:]_])",
+          "name": "constant.numeric.float.dascript"
+        },
+        {
+          "match": "(?<=[^[:alnum:]_])(?i:(\\.\\d+(e[\\-\\+]?\\d+)?)F?)",
           "name": "constant.numeric.float.dascript"
         },
         {
@@ -89,7 +93,7 @@
           "name": "constant.numeric.float.dascript"
         },
         {
-          "match": "\\b(?i:(\\d+e[\\-\\+]?\\d+))",
+          "match": "\\b(?i:([1-9]+[0-9]*|0)F)",
           "name": "constant.numeric.float.dascript"
         },
         {
@@ -105,7 +109,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(\\$|struct|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|scope|typedef|with|cast|override|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|shared)\\b",
+          "match": "\\b(\\$|struct|class|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|scope|typedef|with|cast|override|abstract|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|shared|smart_ptr)\\b",
           "name": "keyword.control.dascript"
         },
         {
