@@ -77,11 +77,15 @@
           "name": "constant.numeric.complex.dascript"
         },
         {
-          "match": "\\b(?i:(\\d+\\.\\d*(e[\\-\\+]?\\d+)?))(?=[^[:alpha:]_])",
+          "match": "\\b(?i:(\\d+\\.\\d*(e[\\-\\+]?\\d+)?)F?)(?=[^[:alpha:]_])",
           "name": "constant.numeric.float.dascript"
         },
         {
-          "match": "(?<=[^[:alnum:]_])(?i:(\\.\\d+(e[\\-\\+]?\\d+)?))",
+          "match": "\\b(?i:(\\d+(e[\\-\\+]?\\d+)?)F?)(?=[^[:alpha:]_])",
+          "name": "constant.numeric.float.dascript"
+        },
+        {
+          "match": "(?<=[^[:alnum:]_])(?i:(\\.\\d+(e[\\-\\+]?\\d+)?)F?)",
           "name": "constant.numeric.float.dascript"
         },
         {
@@ -89,7 +93,7 @@
           "name": "constant.numeric.float.dascript"
         },
         {
-          "match": "\\b(?i:(\\d+e[\\-\\+]?\\d+))",
+          "match": "\\b(?i:([1-9]+[0-9]*|0)F)",
           "name": "constant.numeric.float.dascript"
         },
         {
