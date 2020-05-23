@@ -434,7 +434,7 @@
     },
     "function": {
       "name": "meta.function.dascript",
-      "begin": "(def)\\s+(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
+      "begin": "(def)(\\s+(?:abstract|override))?\\s+(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
       "beginCaptures": {
         "1": {
           "name": "storage.type.function.dascript"
@@ -443,6 +443,9 @@
           "name": "storage.type.function.dascript"
         },
         "3": {
+          "name": "storage.type.function.dascript"
+        },
+        "4": {
           "name": "storage.type.function.dascript"
         }
       },
