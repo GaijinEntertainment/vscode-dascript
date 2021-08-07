@@ -289,7 +289,7 @@
     },
     "builtin_types": {
       "name": "support.type.dascript",
-      "match": "(?x) (?<!\\.) \\b( bool | void | string | auto | int | int2 | int3 | int4 | uint | uint2 | uint3 | uint4 | float | float2 | float3 | float4 | range | urange | block | int64 | uint64 | double | function | lambda | int8 | uint8 | int16 | uint16 | tuple | variant | generator | yield) \\b(?!(\\s*\\())"
+      "match": "(?x) (?<!\\.) \\b( bool | void | string | auto | int | int2 | int3 | int4 | uint | bitfield | uint2 | uint3 | uint4 | float | float2 | float3 | float4 | range | urange | block | int64 | uint64 | double | function | lambda | int8 | uint8 | int16 | uint16 | tuple | variant | generator | yield) \\b(?!(\\s*\\())"
     },
     "builtin_functions_name": {
       "name": "support.function.builtin.name.dascript",
