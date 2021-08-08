@@ -234,7 +234,7 @@ repository:
       - include: $self
   function:
     name: meta.function.dascript
-    begin: (def)(\s+(?:abstract|override))?\s+(?=[\w]+\s*\()|(\$)\s*(?=\[(?:.*?)\])|(\$)\s*(?=\()
+    begin: (def)(\s+(?:abstract|override|private|public))?\s+(?=[\w]+\s*\()|(\$)\s*(?=\[(?:.*?)\])|(\$)\s*(?=\()
     beginCaptures:
       1:
         name: storage.type.function.dascript
@@ -294,7 +294,7 @@ repository:
   struct_declaration:
     patterns:
       - name: meta.class.dascript
-        begin: (?x)\s*(struct)\s+(?=[[:alpha:]_]\w*\s*(:|\())
+        begin: (?x)\s*(struct)(\s+(?:private|public))?\s+(?=[[:alpha:]_]\w*\s*(:|\())
         beginCaptures:
           1: {name: storage.type.class.dascript}
         end: (?=\n)
