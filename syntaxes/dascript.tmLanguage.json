@@ -109,7 +109,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(\\$|struct|class|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|typedef|with|cast|override|abstract|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|explicit|shared|private|smart_ptr|unsafe|aka|assume)\\b",
+          "match": "\\b(\\$|struct|class|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|typedef|with|cast|override|abstract|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|explicit|shared|private|smart_ptr|unsafe|aka|assume|sealed|inscope)\\b",
           "name": "keyword.control.dascript"
         },
         {
@@ -558,7 +558,7 @@
       "patterns": [
         {
           "name": "meta.class.dascript",
-          "begin": "(?x)\\s*(struct)(\\s+(?:private|public))?\\s+(?=[[:alpha:]_]\\w*\\s*(:|\\())",
+          "begin": "(?x)\\s*(struct|class)(\\s+(?:private|public|sealed)*)?\\s+(?=[[:alpha:]_]\\w*\\s*(:|\\())",
           "beginCaptures": {
             "1": {
               "name": "storage.type.class.dascript"
