@@ -109,7 +109,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(\\$|struct|class|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|typedef|with|cast|override|abstract|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|explicit|shared|private|smart_ptr|unsafe|aka|assume|sealed|inscope)\\b",
+          "match": "\\b(\\$|struct|class|let|def|while|if|static_if|else|for|recover|true|false|new|typeinfo|type|in|is|as|elif|static_elif|array|return|null|break|try|options|table|expect|const|require|operator|enum|finally|delete|deref|typedef|with|cast|override|abstract|upcast|iterator|var|addr|continue|where|pass|reinterpret|module|public|label|goto|implicit|explicit|shared|private|smart_ptr|unsafe|aka|assume|sealed|inscope|static)\\b",
           "name": "keyword.control.dascript"
         },
         {
@@ -434,7 +434,7 @@
     },
     "function": {
       "name": "meta.function.dascript",
-      "begin": "(def)(\\s+(?:abstract|override|private|public))?\\s+(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
+      "begin": "(def)(\\s+(?:abstract|override)(?:private|public)(?:static))?\\s+(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
       "beginCaptures": {
         "1": {
           "name": "storage.type.function.dascript"
