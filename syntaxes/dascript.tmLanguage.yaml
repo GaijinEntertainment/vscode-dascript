@@ -234,12 +234,12 @@ repository:
       - include: $self
   function:
     name: meta.function.dascript
-    begin: (def)(\s+(?:abstract|override)(?:private|public)(?:static))?\s+(?=[\w]+\s*\()|(\$)\s*(?=\[(?:.*?)\])|(\$)\s*(?=\()
+    begin: (def)((?:\s+(?:abstract|override|private|public|static))*)|(?:(?:\s+\S+)*)\s+(?=[\w]+\s*\()|(\$)\s*(?=\[(?:.*?)\])|(\$)\s*(?=\()
     beginCaptures:
       1:
         name: storage.type.function.dascript
       2:
-        name: storage.type.function.dascript
+        name: keyword.control.dascript
       3:
         name: storage.type.function.dascript
       4:
