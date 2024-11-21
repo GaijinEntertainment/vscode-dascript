@@ -434,18 +434,24 @@
     },
     "function": {
       "name": "meta.function.dascript",
-      "begin": "(def)(\\s+(?:abstract|override)(?:private|public)(?:static))?\\s+(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
+      "begin": "(def)\\s+((?:private|public|abstract|override|static)\\s+)?((?:private|public|abstract|override)\\s+)?(?=[\\w]+\\s*\\()|(\\$)\\s*(?=\\[(?:.*?)\\])|(\\$)\\s*(?=\\()",
       "beginCaptures": {
         "1": {
           "name": "storage.type.function.dascript"
         },
         "2": {
-          "name": "storage.type.function.dascript"
+          "name": "keyword.control.dascript"
         },
         "3": {
-          "name": "storage.type.function.dascript"
+          "name": "keyword.control.dascript"
         },
         "4": {
+          "name": "storage.type.function.dascript"
+        },
+        "5": {
+          "name": "storage.type.function.dascript"
+        },
+        "6": {
           "name": "storage.type.function.dascript"
         }
       },
@@ -510,11 +516,125 @@
         }
       ]
     },
+    "arrays": {
+      "patterns": [
+        {
+          "name": "meta.array.dascript",
+          "begin": "\\[",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.array.begin.dascript"
+            }
+          },
+          "end": "\\]",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.array.end.dascript"
+            }
+          },
+          "patterns": [
+            {
+              "match": "\\\"",
+              "name": "string.quoted.double.dascript",
+              "begin": "\\\"",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.definition.string.begin.dascript"
+                }
+              },
+              "end": "\\\"",
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.definition.string.end.dascript"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#escaped_char"
+                }
+              ]
+            },
+            {
+              "match": "\\w+",
+              "name": "variable.parameter.array.dascript"
+            },
+            {
+              "match": "\\d+",
+              "name": "constant.numeric.dascript"
+            },
+            {
+              "match": "\\+",
+              "name": "keyword.operator.arithmetic.dascript"
+            },
+            {
+              "match": "\\,",
+              "name": "punctuation.separator.array.dascript"
+            },
+            {
+              "match": "\\b(sin|cos|tan|log|exp|sqrt)\\b",
+              "name": "support.function.math.dascript"
+            },
+            {
+              "match": "\\[",
+              "name": "punctuation.definition.array.begin.dascript",
+              "push": [
+                {
+                  "meta_scope": "meta.array.inner.dascript"
+                },
+                {
+                  "match": "\\]",
+                  "name": "punctuation.definition.array.end.dascript",
+                  "pop": true
+                },
+                {
+                  "include": "$self"
+                }
+              ]
+            },
+            {
+              "match": "\\(",
+              "name": "punctuation.definition.arguments.begin.dascript"
+            },
+            {
+              "match": "\\)",
+              "name": "punctuation.definition.arguments.end.dascript"
+            },
+            {
+              "include": "#strings"
+            }
+          ]
+        }
+      ]
+    },
+    "blocks": {
+      "patterns": [
+        {
+          "name": "meta.block.dascript",
+          "begin": "\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.block.begin.dascript"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.block.end.dascript"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
     "annotations": {
       "patterns": [
         {
           "name": "meta.declaration.annotation.dascript",
-          "begin": "(((?<!\\[)\\[(?!\\[))\\s*([^\\s(\\]]+))\\s*(\\()?",
+          "begin": "(((?<!\\[)\\[(?!\\[))\\s*([[:alpha:]_][[:alnum:]_]+))\\s*(\\()?",
           "beginCaptures": {
             "2": {
               "name": "punctuation.definition.annotation.dascript"
