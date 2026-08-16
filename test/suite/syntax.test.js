@@ -1744,6 +1744,52 @@ suite('daScript Syntax Highlighting Tests', () => {
         console.log('✓ Table type arguments test passed');
     });
 
+    test('Block comments inside generic arguments should be highlighted as comments', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/table-types.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+
+        // Wait for tokenization to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Find: var nodeNetIds : table<uint64 /*NodeId*/; uint /*netId*/>
+        let commentLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('table<uint64 /*NodeId*/; uint /*netId*/>')) {
+                commentLine = i;
+                break;
+            }
+        }
+        assert.ok(commentLine >= 0, 'Should find table with block comments in generic arguments');
+
+        // Verify 'NodeId' inside /*NodeId*/ is a comment, not a type
+        const nodeIdPos = findInLine(document, commentLine, 'NodeId');
+        const nodeIdScopes = await getTokenScopesAt(document, commentLine, nodeIdPos.character);
+        const nodeIdIsComment = nodeIdScopes?.scopes?.some(scope => scope.includes('comment'));
+        const nodeIdIsType = nodeIdScopes?.scopes?.some(scope => scope.includes('entity.name.type'));
+        assert.ok(nodeIdIsComment, `NodeId inside /*NodeId*/ should be a comment. Got scopes: ${JSON.stringify(nodeIdScopes?.scopes)}`);
+        assert.ok(!nodeIdIsType, `NodeId inside /*NodeId*/ should NOT be a type. Got scopes: ${JSON.stringify(nodeIdScopes?.scopes)}`);
+
+        // Verify 'netId' inside /*netId*/ is a comment
+        const netIdPos = findInLine(document, commentLine, 'netId*/');
+        const netIdScopes = await getTokenScopesAt(document, commentLine, netIdPos.character);
+        const netIdIsComment = netIdScopes?.scopes?.some(scope => scope.includes('comment'));
+        assert.ok(netIdIsComment, `netId inside /*netId*/ should be a comment. Got scopes: ${JSON.stringify(netIdScopes?.scopes)}`);
+
+        // Verify 'uint64' is still highlighted as a type
+        const uint64Pos = findInLine(document, commentLine, 'uint64');
+        const uint64Scopes = await getTokenScopesAt(document, commentLine, uint64Pos.character);
+        const uint64IsType = uint64Scopes?.scopes?.some(scope =>
+            scope.includes('support.type') || scope.includes('entity.name.type')
+        );
+        assert.ok(uint64IsType, `uint64 should still be highlighted as a type. Got scopes: ${JSON.stringify(uint64Scopes?.scopes)}`);
+
+        console.log('✓ Block comments inside generic arguments test passed');
+    });
+
     test('Annotations should be highlighted correctly', async () => {
         const uri = vscode.Uri.file(
             path.join(__dirname, '../../test/fixtures/annotations.das')

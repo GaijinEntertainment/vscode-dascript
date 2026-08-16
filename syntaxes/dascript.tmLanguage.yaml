@@ -271,6 +271,7 @@ repository:
         endCaptures:
           1: {name: punctuation.definition.generic.end.dascript}
         patterns:
+          - include: '#comments'
           - include: '#qmacro_escape_sequences'
           - name: meta.function.signature.dascript
             begin: \(
@@ -280,6 +281,7 @@ repository:
             endCaptures:
               0: {name: punctuation.definition.parameters.end.dascript}
             patterns:
+              - include: '#comments'
               - include: '#builtin_types'
               - include: '#module_qualified_type'
               - name: meta.parameter.dascript
@@ -309,6 +311,7 @@ repository:
         endCaptures:
           1: {name: punctuation.definition.generic.end.dascript}
         patterns:
+          - include: '#comments'
           - include: '#qmacro_escape_sequences'
           - include: '#generic_types'
           - name: meta.tuple.field.dascript
@@ -333,6 +336,7 @@ repository:
         endCaptures:
           1: {name: punctuation.definition.generic.end.dascript}
         patterns:
+          - include: '#comments'
           - include: '#qmacro_escape_sequences'
           - include: '#generic_types'
           - include: '#keywords_without_operators'
@@ -343,6 +347,7 @@ repository:
               2: {name: punctuation.separator.type.dascript}
             end: (?=;|>)
             patterns:
+              - include: '#comments'
               - name: meta.type.auto.parameterized.variant.dascript
                 begin: \b(auto)\s*(\()
                 beginCaptures:
@@ -374,6 +379,7 @@ repository:
         endCaptures:
           1: {name: punctuation.definition.generic.end.dascript}
         patterns:
+          - include: '#comments'
           - include: '#qmacro_escape_sequences'
           - include: '#generic_types'
           - include: '#keywords_without_operators'

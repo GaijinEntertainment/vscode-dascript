@@ -578,6 +578,9 @@
           },
           "patterns": [
             {
+              "include": "#comments"
+            },
+            {
               "include": "#qmacro_escape_sequences"
             },
             {
@@ -595,6 +598,9 @@
                 }
               },
               "patterns": [
+                {
+                  "include": "#comments"
+                },
                 {
                   "include": "#builtin_types"
                 },
@@ -665,6 +671,9 @@
           },
           "patterns": [
             {
+              "include": "#comments"
+            },
+            {
               "include": "#qmacro_escape_sequences"
             },
             {
@@ -721,6 +730,9 @@
           },
           "patterns": [
             {
+              "include": "#comments"
+            },
+            {
               "include": "#qmacro_escape_sequences"
             },
             {
@@ -742,6 +754,9 @@
               },
               "end": "(?=;|>)",
               "patterns": [
+                {
+                  "include": "#comments"
+                },
                 {
                   "name": "meta.type.auto.parameterized.variant.dascript",
                   "begin": "\\b(auto)\\s*(\\()",
@@ -815,6 +830,9 @@
             }
           },
           "patterns": [
+            {
+              "include": "#comments"
+            },
             {
               "include": "#qmacro_escape_sequences"
             },

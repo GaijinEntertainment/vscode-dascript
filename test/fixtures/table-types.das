@@ -31,3 +31,6 @@ var complex : table<NodeId, array<float>>
 // Table with builtin types
 var builtins : table<int64, double>
 var mixed : table<uint, bool>
+
+// Block comments inside generic arguments should stay comments
+var nodeNetIds : table<uint64 /*NodeId*/; uint /*netId*/>
