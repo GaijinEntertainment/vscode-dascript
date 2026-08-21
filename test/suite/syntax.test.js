@@ -678,6 +678,26 @@ suite('daScript Syntax Highlighting Tests', () => {
             assert.ok(boolHasTypeScope, `bool should be tokenized as a type. Got scopes: ${JSON.stringify(boolScopes?.scopes)}`);
         }
 
+        // Nested generic parameter type: array<int> in function<(data : array<int>, ...)>
+        let nestedGenericLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('data : array<int>')) {
+                nestedGenericLine = i;
+                break;
+            }
+        }
+        assert.ok(nestedGenericLine >= 0, 'Should find line with data : array<int>');
+
+        const arrayPos = findInLine(document, nestedGenericLine, 'array<int>');
+        const arrayScopes = await getTokenScopesAt(document, nestedGenericLine, arrayPos.character);
+        const arrayIsKeywordType = arrayScopes?.scopes?.some(scope => scope.includes('keyword.type'));
+        assert.ok(arrayIsKeywordType, `'array' in function pointer parameter should be keyword.type. Got scopes: ${JSON.stringify(arrayScopes?.scopes)}`);
+
+        const intTypePos = findInLine(document, nestedGenericLine, 'int>');
+        const intTypeScopes = await getTokenScopesAt(document, nestedGenericLine, intTypePos.character);
+        const intIsBuiltinType = intTypeScopes?.scopes?.some(scope => scope.includes('support.type'));
+        assert.ok(intIsBuiltinType, `'int' in array<int> should be a builtin type. Got scopes: ${JSON.stringify(intTypeScopes?.scopes)}`);
+
         console.log('✓ Function pointer parameter types test passed');
     });
 
@@ -1241,7 +1261,80 @@ suite('daScript Syntax Highlighting Tests', () => {
         );
         assert.ok(nodeIdIsType, `'NodeId' in lambda<NodeId> should be highlighted as a type. Got scopes: ${JSON.stringify(nodeIdScopes?.scopes)}`);
 
+        // Test 5: 'var' inside lambda signature should be a keyword, not a type
+        let varParamLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('lambda<(var urls')) {
+                varParamLine = i;
+                break;
+            }
+        }
+        assert.ok(varParamLine >= 0, 'Should find lambda signature with var parameter line');
+
+        const varParamPos = findInLine(document, varParamLine, 'var urls');
+        const varParamScopes = await getTokenScopesAt(document, varParamLine, varParamPos.character);
+        const varIsKeyword = varParamScopes?.scopes?.some(scope => scope.includes('storage.modifier'));
+        const varIsNotType = !varParamScopes?.scopes?.some(scope => scope.includes('entity.name.type'));
+        assert.ok(varIsKeyword && varIsNotType, `'var' in lambda signature should be a storage modifier, not a type. Got scopes: ${JSON.stringify(varParamScopes?.scopes)}`);
+
+        // 'array' in the nested generic should be a keyword.type, 'string' a type
+        const arrayPos = findInLine(document, varParamLine, 'array<string>');
+        const arrayScopes = await getTokenScopesAt(document, varParamLine, arrayPos.character);
+        const arrayIsKeywordType = arrayScopes?.scopes?.some(scope => scope.includes('keyword.type'));
+        assert.ok(arrayIsKeywordType, `'array' in lambda signature should be keyword.type. Got scopes: ${JSON.stringify(arrayScopes?.scopes)}`);
+
         console.log('✓ Lambda type templates test passed');
+    });
+
+    test('@@function references should highlight as function names', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/function-pointers.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+
+        // Wait for tokenization to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Test 1: @@on_lobby_created inside a call argument list
+        let callLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('set_lobby_callbacks(@@on_lobby_created')) {
+                callLine = i;
+                break;
+            }
+        }
+        assert.ok(callLine >= 0, 'Should find set_lobby_callbacks line');
+
+        const refPos = findInLine(document, callLine, 'on_lobby_created,');
+        const refScopes = await getTokenScopesAt(document, callLine, refPos.character);
+        const refIsFunction = refScopes?.scopes?.some(scope => scope.includes('entity.name.function'));
+        const refIsNotAnnotation = !refScopes?.scopes?.some(scope => scope.includes('annotation'));
+        assert.ok(refIsFunction && refIsNotAnnotation, `'on_lobby_created' after @@ should be a function name, not an annotation. Got scopes: ${JSON.stringify(refScopes?.scopes)}`);
+
+        // The comma after the reference must not be swallowed by an annotation region
+        const commaPos = findInLine(document, callLine, ', @@on_lobby_connected');
+        const commaScopes = await getTokenScopesAt(document, callLine, commaPos.character);
+        const commaIsClean = !commaScopes?.scopes?.some(scope => scope.includes('meta.annotation'));
+        assert.ok(commaIsClean, `',' after @@ref should not be inside an annotation region. Got scopes: ${JSON.stringify(commaScopes?.scopes)}`);
+
+        // Test 2: module-qualified reference @@events::on_update
+        let qualLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('@@events::on_update')) {
+                qualLine = i;
+                break;
+            }
+        }
+        assert.ok(qualLine >= 0, 'Should find @@events::on_update line');
+
+        const qualPos = findInLine(document, qualLine, 'events::on_update');
+        const qualScopes = await getTokenScopesAt(document, qualLine, qualPos.character);
+        const qualIsFunction = qualScopes?.scopes?.some(scope => scope.includes('entity.name.function'));
+        assert.ok(qualIsFunction, `'events::on_update' after @@ should be a function name. Got scopes: ${JSON.stringify(qualScopes?.scopes)}`);
+
+        console.log('✓ @@function references test passed');
     });
 
     test('Syntax in comments should be ignored and only highlighted as comment', async () => {
@@ -2181,6 +2274,169 @@ suite('daScript Syntax Highlighting Tests', () => {
         console.log('✓ Cast/reinterpret types test passed');
     });
 
+    test('Base types called as constructor casts should be highlighted as types', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/cast-types.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+
+        // Wait for tokenization to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Test 1: uint16(0)
+        let u16Line = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('uint16(0)')) {
+                u16Line = i;
+                break;
+            }
+        }
+        assert.ok(u16Line >= 0, 'Should find uint16(0) line');
+
+        const u16Pos = findInLine(document, u16Line, 'uint16');
+        const u16Scopes = await getTokenScopesAt(document, u16Line, u16Pos.character);
+        const u16IsType = u16Scopes?.scopes?.some(scope => scope.includes('support.type'));
+        assert.ok(u16IsType, `'uint16' in uint16(0) should be highlighted as a type. Got scopes: ${JSON.stringify(u16Scopes?.scopes)}`);
+
+        // Test 2: float(intValue)
+        let floatLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('float(intValue)')) {
+                floatLine = i;
+                break;
+            }
+        }
+        assert.ok(floatLine >= 0, 'Should find float(intValue) line');
+
+        const floatPos = findInLine(document, floatLine, 'float');
+        const floatScopes = await getTokenScopesAt(document, floatLine, floatPos.character);
+        const floatIsType = floatScopes?.scopes?.some(scope => scope.includes('support.type'));
+        assert.ok(floatIsType, `'float' in float(intValue) should be highlighted as a type. Got scopes: ${JSON.stringify(floatScopes?.scopes)}`);
+
+        // Test 3: float3(1.0, 2.0, 3.0)
+        let float3Line = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('float3(1.0, 2.0, 3.0)')) {
+                float3Line = i;
+                break;
+            }
+        }
+        assert.ok(float3Line >= 0, 'Should find float3(1.0, 2.0, 3.0) line');
+
+        const float3Pos = findInLine(document, float3Line, 'float3');
+        const float3Scopes = await getTokenScopesAt(document, float3Line, float3Pos.character);
+        const float3IsType = float3Scopes?.scopes?.some(scope => scope.includes('support.type'));
+        assert.ok(float3IsType, `'float3' in float3(...) should be highlighted as a type. Got scopes: ${JSON.stringify(float3Scopes?.scopes)}`);
+
+        // Test 4: range(10) should be a function call, not a type
+        let rangeCallLine = -1;
+        let rangeTypeLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            const lineText = document.lineAt(i).text;
+            if (rangeCallLine < 0 && lineText.includes('range(10)')) {
+                rangeCallLine = i;
+            }
+            if (rangeTypeLine < 0 && lineText.includes('var r : range')) {
+                rangeTypeLine = i;
+            }
+        }
+        assert.ok(rangeCallLine >= 0, 'Should find range(10) line');
+        assert.ok(rangeTypeLine >= 0, 'Should find var r : range line');
+
+        const rangeCallPos = findInLine(document, rangeCallLine, 'range');
+        const rangeCallScopes = await getTokenScopesAt(document, rangeCallLine, rangeCallPos.character);
+        const rangeIsFunction = rangeCallScopes?.scopes?.some(scope => scope.includes('entity.name.function'));
+        const rangeCallIsType = rangeCallScopes?.scopes?.some(scope => scope.includes('support.type'));
+        assert.ok(rangeIsFunction && !rangeCallIsType, `'range' in range(10) should be highlighted as a function call, not a type. Got scopes: ${JSON.stringify(rangeCallScopes?.scopes)}`);
+
+        const rangeTypePos = findInLine(document, rangeTypeLine, 'range');
+        const rangeTypeScopes = await getTokenScopesAt(document, rangeTypeLine, rangeTypePos.character);
+        const rangeIsType = rangeTypeScopes?.scopes?.some(scope =>
+            scope.includes('support.type') || scope.includes('entity.name.type')
+        );
+        assert.ok(rangeIsType, `'range' in 'var r : range' should still be highlighted as a type. Got scopes: ${JSON.stringify(rangeTypeScopes?.scopes)}`);
+
+        console.log('✓ Constructor cast types test passed');
+    });
+
+    test('qmacro_expr and reification tags should highlight correctly', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/call-macro-annotations.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+
+        // Wait for tokenization to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Test 1: qmacro_expr should be highlighted the same as qmacro_block
+        let qmacroBlockLine = -1;
+        let qmacroExprLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            const lineText = document.lineAt(i).text;
+            if (qmacroBlockLine < 0 && lineText.includes('qmacro_block <|')) {
+                qmacroBlockLine = i;
+            }
+            if (qmacroExprLine < 0 && lineText.includes('qmacro_expr <|')) {
+                qmacroExprLine = i;
+            }
+        }
+        assert.ok(qmacroBlockLine >= 0, 'Should find qmacro_block line');
+        assert.ok(qmacroExprLine >= 0, 'Should find qmacro_expr line');
+
+        const qmacroBlockPos = findInLine(document, qmacroBlockLine, 'qmacro_block');
+        const qmacroBlockScopes = await getTokenScopesAt(document, qmacroBlockLine, qmacroBlockPos.character);
+
+        const qmacroExprPos = findInLine(document, qmacroExprLine, 'qmacro_expr');
+        const qmacroExprScopes = await getTokenScopesAt(document, qmacroExprLine, qmacroExprPos.character);
+
+        const exprIsFunction = qmacroExprScopes?.scopes?.some(scope =>
+            scope.includes('entity.name.function')
+        );
+        assert.ok(exprIsFunction, `'qmacro_expr' should be highlighted as a function like qmacro_block. Got scopes: ${JSON.stringify(qmacroExprScopes?.scopes)}`);
+        assert.deepStrictEqual(qmacroExprScopes?.scopes, qmacroBlockScopes?.scopes,
+            `'qmacro_expr' should get the same scopes as 'qmacro_block'. qmacro_expr: ${JSON.stringify(qmacroExprScopes?.scopes)}, qmacro_block: ${JSON.stringify(qmacroBlockScopes?.scopes)}`);
+
+        // Test 2: reification tags $i / $e should be storage.modifier including the $ sign
+        let tagLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('for $i(iname) in $e(call.arguments[0])')) {
+                tagLine = i;
+                break;
+            }
+        }
+        assert.ok(tagLine >= 0, 'Should find line with $i and $e tags');
+
+        const lineText = document.lineAt(tagLine).text;
+
+        // Check both the '$' and the letter of '$i'
+        const dollarIIndex = lineText.indexOf('$i(');
+        for (const offset of [0, 1]) {
+            const scopes = await getTokenScopesAt(document, tagLine, dollarIIndex + offset);
+            const isStorageModifier = scopes?.scopes?.some(scope => scope.includes('storage.modifier'));
+            assert.ok(isStorageModifier, `'$i' (char ${offset}) should be storage.modifier. Got scopes: ${JSON.stringify(scopes?.scopes)}`);
+        }
+
+        // Check both the '$' and the letter of '$e'
+        const dollarEIndex = lineText.indexOf('$e(');
+        for (const offset of [0, 1]) {
+            const scopes = await getTokenScopesAt(document, tagLine, dollarEIndex + offset);
+            const isStorageModifier = scopes?.scopes?.some(scope => scope.includes('storage.modifier'));
+            assert.ok(isStorageModifier, `'$e' (char ${offset}) should be storage.modifier. Got scopes: ${JSON.stringify(scopes?.scopes)}`);
+        }
+
+        // The captured variable inside the tag should stay a variable, not storage.modifier
+        const inamePos = findInLine(document, tagLine, 'iname');
+        const inameScopes = await getTokenScopesAt(document, tagLine, inamePos.character);
+        const inameIsVariable = inameScopes?.scopes?.some(scope => scope.includes('variable'));
+        assert.ok(inameIsVariable, `'iname' inside $i() should be a variable. Got scopes: ${JSON.stringify(inameScopes?.scopes)}`);
+
+        console.log('✓ qmacro_expr and reification tags test passed');
+    });
+
     test('Module-qualified types (namespace::Type) should highlight namespace as type', async () => {
         const uri = vscode.Uri.file(
             path.join(__dirname, '../../test/fixtures/cast-types.das')
@@ -2261,6 +2517,52 @@ suite('daScript Syntax Highlighting Tests', () => {
         );
         assert.ok(isSmartPtrAstType, `'ast' in smart_ptr<ast::TypeDecl> should be highlighted as a type. Got scopes: ${JSON.stringify(smartPtrAstScopes?.scopes)}`);
         assert.ok(isNotVariantIdentifier, `'ast' in smart_ptr<ast::TypeDecl> should NOT be highlighted as a variant identifier. Got scopes: ${JSON.stringify(smartPtrAstScopes?.scopes)}`);
+
+        // Test 4: module-qualified variable on assignment LHS: user::userName = userName
+        let qualAssignLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('user::userName = userName')) {
+                qualAssignLine = i;
+                break;
+            }
+        }
+        assert.ok(qualAssignLine >= 0, 'Should find user::userName = userName line');
+
+        const qualVarPos = findInLine(document, qualAssignLine, 'userName =');
+        const qualVarScopes = await getTokenScopesAt(document, qualAssignLine, qualVarPos.character);
+        const qualVarIsVariable = qualVarScopes?.scopes?.some(scope => scope.includes('variable'));
+        const qualVarIsNotType = !qualVarScopes?.scopes?.some(scope => scope.includes('entity.name.type'));
+        assert.ok(qualVarIsVariable && qualVarIsNotType, `'userName' in 'user::userName =' should be a variable, not a type. Got scopes: ${JSON.stringify(qualVarScopes?.scopes)}`);
+
+        // Member access position: net::config.timeout
+        let memberLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('net::config.timeout')) {
+                memberLine = i;
+                break;
+            }
+        }
+        assert.ok(memberLine >= 0, 'Should find net::config.timeout line');
+
+        const memberPos = findInLine(document, memberLine, 'config');
+        const memberScopes = await getTokenScopesAt(document, memberLine, memberPos.character);
+        const memberIsVariable = memberScopes?.scopes?.some(scope => scope.includes('variable'));
+        assert.ok(memberIsVariable, `'config' in 'net::config.timeout' should be a variable. Got scopes: ${JSON.stringify(memberScopes?.scopes)}`);
+
+        // Function call position: net::send_message(...)
+        let qualCallLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('net::send_message(')) {
+                qualCallLine = i;
+                break;
+            }
+        }
+        assert.ok(qualCallLine >= 0, 'Should find net::send_message line');
+
+        const qualCallPos = findInLine(document, qualCallLine, 'send_message');
+        const qualCallScopes = await getTokenScopesAt(document, qualCallLine, qualCallPos.character);
+        const qualCallIsFunction = qualCallScopes?.scopes?.some(scope => scope.includes('entity.name.function'));
+        assert.ok(qualCallIsFunction, `'send_message' in 'net::send_message(...)' should be a function name. Got scopes: ${JSON.stringify(qualCallScopes?.scopes)}`);
 
         console.log('✓ Module-qualified types test passed');
     });

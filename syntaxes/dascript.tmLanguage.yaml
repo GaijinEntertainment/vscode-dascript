@@ -3,6 +3,7 @@ name: daScript
 scopeName: source.dascript
 patterns:
   - include: '#comments'
+  - include: '#function_reference'
   - include: '#annotations'
   - include: '#struct_declaration'
   - include: '#function'
@@ -188,6 +189,12 @@ repository:
         patterns:
           - name: constant.character.escape.dascript
             match: \\.
+  function_reference:
+    # Address-of-function references: @@func, @@module::func
+    match: (@@)([[:alpha:]_][[:alnum:]_]*(?:::[[:alnum:]_]+)*)\b
+    captures:
+      1: {name: storage.modifier.address-of-function.dascript}
+      2: {name: entity.name.function.dascript}
   annotations:
     patterns:
       # Structure annotations: [match_copy], [match_as_is], [some_annotation(arg1, arg2)], etc.
@@ -282,7 +289,10 @@ repository:
               0: {name: punctuation.definition.parameters.end.dascript}
             patterns:
               - include: '#comments'
+              - match: \b(var|let)\b
+                name: storage.modifier.specifier.decl.dascript
               - include: '#builtin_types'
+              - include: '#generic_types'
               - include: '#module_qualified_type'
               - name: meta.parameter.dascript
                 match: \b([[:alpha:]_][[:alnum:]_]*)\s*(:)
@@ -398,9 +408,9 @@ repository:
           \b(
             bool | void | string | int | int2 | int3 | int4 |
             uint | uint2 | uint3 | uint4 | float | float2 |
-            float3 | float4 | range | urange | int64 | uint64 |
+            float3 | float4 | range(?!\s*\() | urange(?!\s*\() | int64 | uint64 |
             double | int8 | uint8 | int16 | uint16)
-          \b(?!(\s*\())
+          \b
       - name: meta.type.auto.parameterized.dascript
         begin: \b(auto)\s*(\()
         beginCaptures:
@@ -471,16 +481,16 @@ repository:
           - match: \b([[:alnum:]_]+)\b
             name: entity.name.type.dascript
   module_qualified_type:
-    # Matches module-qualified types like ast::TypeDecl, math::Vector3, etc.
-    # The module namespace should be highlighted as a type, not a variable
-    match: \b([[:alpha:]_][[:alnum:]_]*)(::)([[:alpha:]_][[:alnum:]_]*)\b
+    # module:: namespace prefix (ast::, math::, user::). Only the prefix is
+    # consumed; the name after it is tokenized by whatever rules apply in the
+    # surrounding context (type in type positions, variable/function in expressions)
+    match: \b([[:alpha:]_][[:alnum:]_]*)(::)
     captures:
       1: {name: entity.name.type.module.dascript}
       2: {name: punctuation.separator.namespace.dascript}
-      3: {name: entity.name.type.dascript}
   qmacro_functions:
     name: meta.function-call.qmacro.dascript
-    match: \b(qmacro_block|qmacro|qmacro_function|qmacro_type|qmacro_template_class|qmacro_variable)\b
+    match: \b(qmacro_block|qmacro_expr|qmacro|qmacro_function|qmacro_type|qmacro_template_class|qmacro_variable)\b
     captures:
       1: {name: entity.name.function}
   function_call:
@@ -529,7 +539,8 @@ repository:
           2: {name: entity.name.function}
   qmacro_escape_sequences:
     patterns:
-      # Macro reification escape sequences: $e(), $v(), $i(), $t(), $a(), $c(), $b()
+      # Macro reification escape sequences / AST matching tags:
+      # $e(), $v(), $i(), $t(), $a(), $c(), $b(), $f()
       # $e - expression substitution
       # $v - value substitution
       # $i - identifier/iterator substitution
@@ -537,13 +548,12 @@ repository:
       # $a - argument array substitution
       # $c - call name substitution
       # $b - block/expression array substitution
+      # $f - field name capture
       - name: meta.qmacro-escape.dascript
-        begin: (\$)([ifevatcb])(\()
+        begin: (\$[ifevatcb])(\()
         beginCaptures:
-          # TODO: handle tuple<$i()> correctly
-          # 1: {name: keyword.other.dascript}
-          2: {name: keyword.control.dascript}
-          3: {name: punctuation.definition.arguments.begin.dascript}
+          1: {name: storage.modifier.dascript}
+          2: {name: punctuation.definition.arguments.begin.dascript}
         end: (\))
         endCaptures:
           1: {name: punctuation.definition.arguments.end.dascript}
@@ -770,14 +780,14 @@ repository:
       - include: '#comments'
   assignment:
     name: meta.assignment.dascript
-    begin: \b(?<!typedef\s*|\:\s*)([[:alpha:]_][[:alnum:]_]*)\s*(?=\=|\+\=|-\=|\*\=|\/\=|\&\=|\|\=|\^\=)
+    begin: \b(?<!typedef\s*|[^:]\:\s*)([[:alpha:]_][[:alnum:]_]*)\s*(?=\=|\+\=|-\=|\*\=|\/\=|\&\=|\|\=|\^\=)
     beginCaptures:
       1: {name: variable.parameter.type.dascript}
     end: (?=\=|\+\=|-\=|\*\=|\/\=|\&\=|\|\=|\^\=)
     patterns:
       - include: '#comments'
   identifier:
-    match: \b(?<!\:\s*)([[:alpha:]_][[:alnum:]_]*)\b
+    match: \b(?<![^:]\:\s*)([[:alpha:]_][[:alnum:]_]*)\b
     name: variable.parameter.identifier.dascript
   typedef:
     patterns:
@@ -834,6 +844,8 @@ repository:
                   1: {name: variable.parameter.function.dascript}
                 end: (?=\,|\))
                 patterns:
+                  - include: '#builtin_types'
+                  - include: '#generic_types'
                   - include: '#module_qualified_type'
                   - match: \b([[:alnum:]_]+)\b
                     name: entity.name.type.dascript

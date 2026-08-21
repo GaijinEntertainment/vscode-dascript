@@ -30,3 +30,6 @@ var getId : lambda<uint64>
 
 // Lambda with double return type
 var getPrecision : lambda<double>
+
+// Lambda signature with var parameter modifier and nested generic type
+var connected : lambda<(var urls : array<string>, userName : string) : void>

@@ -40,3 +40,22 @@ def test_module_qualified_declarations()
 // smart_ptr with module-qualified types (template context)
 def getCppType(typ : smart_ptr<ast::TypeDecl>&, var imports : table<string>&)
     pass
+
+// Base types called as constructor casts should highlight as types
+def test_constructor_casts()
+    let u16 = uint16(0)
+    let f = float(intValue)
+    var v = float3(1.0, 2.0, 3.0)
+
+// Module-qualified variable assignment: the member is a variable, not a type
+def test_module_qualified_assignment(userName : string)
+    user::userName = userName
+    game::score += 1
+    net::config.timeout = 5
+    net::send_message(userName)
+
+// range() is a builtin iterator function, not a constructor cast
+def test_range_call()
+    for i in range(10)
+        pass
+    var r : range

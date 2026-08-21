@@ -13,3 +13,9 @@ handler : function<(data : array<int>, config : Config?) : void>
 struct MyStruct
     onEvent : function<(eventId : EventId) : void>
     calculate : function<(value : float) : float>
+
+// Address-of-function references
+def setup()
+    set_lobby_callbacks(@@on_lobby_created, @@on_lobby_connected, @@on_lobby_destroyed)
+    var cb = @@handler
+    subscribe(@@events::on_update)

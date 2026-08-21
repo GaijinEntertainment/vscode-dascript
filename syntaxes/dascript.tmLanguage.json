@@ -7,6 +7,9 @@
       "include": "#comments"
     },
     {
+      "include": "#function_reference"
+    },
+    {
       "include": "#annotations"
     },
     {
@@ -419,6 +422,17 @@
         }
       ]
     },
+    "function_reference": {
+      "match": "(@@)([[:alpha:]_][[:alnum:]_]*(?:::[[:alnum:]_]+)*)\\b",
+      "captures": {
+        "1": {
+          "name": "storage.modifier.address-of-function.dascript"
+        },
+        "2": {
+          "name": "entity.name.function.dascript"
+        }
+      }
+    },
     "annotations": {
       "patterns": [
         {
@@ -602,7 +616,14 @@
                   "include": "#comments"
                 },
                 {
+                  "match": "\\b(var|let)\\b",
+                  "name": "storage.modifier.specifier.decl.dascript"
+                },
+                {
                   "include": "#builtin_types"
+                },
+                {
+                  "include": "#generic_types"
                 },
                 {
                   "include": "#module_qualified_type"
@@ -864,7 +885,7 @@
       "patterns": [
         {
           "name": "support.type.dascript",
-          "match": "(?x) (?<!\\.) \\b( bool | void | string | int | int2 | int3 | int4 | uint | uint2 | uint3 | uint4 | float | float2 | float3 | float4 | range | urange | int64 | uint64 | double | int8 | uint8 | int16 | uint16) \\b(?!(\\s*\\())"
+          "match": "(?x) (?<!\\.) \\b( bool | void | string | int | int2 | int3 | int4 | uint | uint2 | uint3 | uint4 | float | float2 | float3 | float4 | range(?!\\s*\\() | urange(?!\\s*\\() | int64 | uint64 | double | int8 | uint8 | int16 | uint16) \\b"
         },
         {
           "name": "meta.type.auto.parameterized.dascript",
@@ -988,22 +1009,19 @@
       ]
     },
     "module_qualified_type": {
-      "match": "\\b([[:alpha:]_][[:alnum:]_]*)(::)([[:alpha:]_][[:alnum:]_]*)\\b",
+      "match": "\\b([[:alpha:]_][[:alnum:]_]*)(::)",
       "captures": {
         "1": {
           "name": "entity.name.type.module.dascript"
         },
         "2": {
           "name": "punctuation.separator.namespace.dascript"
-        },
-        "3": {
-          "name": "entity.name.type.dascript"
         }
       }
     },
     "qmacro_functions": {
       "name": "meta.function-call.qmacro.dascript",
-      "match": "\\b(qmacro_block|qmacro|qmacro_function|qmacro_type|qmacro_template_class|qmacro_variable)\\b",
+      "match": "\\b(qmacro_block|qmacro_expr|qmacro|qmacro_function|qmacro_type|qmacro_template_class|qmacro_variable)\\b",
       "captures": {
         "1": {
           "name": "entity.name.function"
@@ -1108,12 +1126,12 @@
       "patterns": [
         {
           "name": "meta.qmacro-escape.dascript",
-          "begin": "(\\$)([ifevatcb])(\\()",
+          "begin": "(\\$[ifevatcb])(\\()",
           "beginCaptures": {
-            "2": {
-              "name": "keyword.control.dascript"
+            "1": {
+              "name": "storage.modifier.dascript"
             },
-            "3": {
+            "2": {
               "name": "punctuation.definition.arguments.begin.dascript"
             }
           },
@@ -1592,7 +1610,7 @@
     },
     "assignment": {
       "name": "meta.assignment.dascript",
-      "begin": "\\b(?<!typedef\\s*|\\:\\s*)([[:alpha:]_][[:alnum:]_]*)\\s*(?=\\=|\\+\\=|-\\=|\\*\\=|\\/\\=|\\&\\=|\\|\\=|\\^\\=)",
+      "begin": "\\b(?<!typedef\\s*|[^:]\\:\\s*)([[:alpha:]_][[:alnum:]_]*)\\s*(?=\\=|\\+\\=|-\\=|\\*\\=|\\/\\=|\\&\\=|\\|\\=|\\^\\=)",
       "beginCaptures": {
         "1": {
           "name": "variable.parameter.type.dascript"
@@ -1606,7 +1624,7 @@
       ]
     },
     "identifier": {
-      "match": "\\b(?<!\\:\\s*)([[:alpha:]_][[:alnum:]_]*)\\b",
+      "match": "\\b(?<![^:]\\:\\s*)([[:alpha:]_][[:alnum:]_]*)\\b",
       "name": "variable.parameter.identifier.dascript"
     },
     "typedef": {
@@ -1724,6 +1742,12 @@
                   },
                   "end": "(?=\\,|\\))",
                   "patterns": [
+                    {
+                      "include": "#builtin_types"
+                    },
+                    {
+                      "include": "#generic_types"
+                    },
                     {
                       "include": "#module_qualified_type"
                     },
