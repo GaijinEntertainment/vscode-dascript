@@ -296,6 +296,8 @@ repository:
               0: {name: punctuation.definition.parameters.end.dascript}
             patterns:
               - include: '#comments'
+              - match: \b(var|let)\b
+                name: storage.modifier.specifier.decl.dascript
               - include: '#builtin_types'
               - include: '#generic_types'
               - include: '#module_qualified_type'
