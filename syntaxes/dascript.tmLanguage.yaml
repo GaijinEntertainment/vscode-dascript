@@ -588,7 +588,7 @@ repository:
   function:
     patterns:
       - name: meta.function.dascript
-        match: \b(def)\s+((?:(?:private|public|abstract|override|static)\s+)*)(operator\s+)?([[:alnum:]_]+)
+        match: \b(def)\s+((?:(?:private|public|abstract|override|static|const|unsafe|sealed)\s+)*)(operator\s+(?:[.?]+\s*)?)?([[:alnum:]_]+)
         captures:
           1:
             name: storage.type.function.dascript
