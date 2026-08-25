@@ -2797,13 +2797,14 @@ suite('daScript Syntax Highlighting Tests', () => {
         // 'def private static submit_message(...)' and 'def public override abstract tick : int'
         const cases = [
             { def: 'def private static ', modifiers: ['private', 'static'], name: 'submit_message' },
-            { def: 'def public override abstract ', modifiers: ['public', 'override', 'abstract'], name: 'tick' }
+            { def: 'def public override abstract ', modifiers: ['public', 'override', 'abstract'], name: 'tick' },
+            { def: 'def const operator . ', modifiers: ['const', 'operator'], name: 'controlledByLocalPlayer' }
         ];
 
         for (const c of cases) {
             let defLine = -1;
             for (let i = 0; i < document.lineCount; i++) {
-                if (document.lineAt(i).text.startsWith(c.def)) {
+                if (document.lineAt(i).text.trimStart().startsWith(c.def)) {
                     defLine = i;
                     break;
                 }

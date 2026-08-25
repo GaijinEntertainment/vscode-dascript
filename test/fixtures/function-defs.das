@@ -14,3 +14,8 @@ def private static submit_message(clientNode : NodeId; inputFieldNode : NodeId) 
 }
 
 def public override abstract tick : int
+
+struct Player
+    def const operator . controlledByLocalPlayer() {
+        return controlledByConnectionId == LOCAL_CONNECTION_ID
+    }
