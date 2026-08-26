@@ -2798,7 +2798,10 @@ suite('daScript Syntax Highlighting Tests', () => {
         const cases = [
             { def: 'def private static ', modifiers: ['private', 'static'], name: 'submit_message' },
             { def: 'def public override abstract ', modifiers: ['public', 'override', 'abstract'], name: 'tick' },
-            { def: 'def const operator . ', modifiers: ['const', 'operator'], name: 'controlledByLocalPlayer' }
+            { def: 'def const operator . ', modifiers: ['const', 'operator'], name: 'controlledByLocalPlayer' },
+            { def: 'def operator + ', modifiers: ['operator', '+'], name: null },
+            { def: 'def operator [] ', modifiers: ['operator', '[]'], name: null },
+            { def: 'def operator ?as ', modifiers: ['operator', '?as'], name: 'Player' }
         ];
 
         for (const c of cases) {
@@ -2820,6 +2823,7 @@ suite('daScript Syntax Highlighting Tests', () => {
                 assert.ok(!isFunctionName, `'${modifier}' should NOT be the function name. Got scopes: ${JSON.stringify(scopes?.scopes)}`);
             }
 
+            if (!c.name) continue;
             const namePos = findInLine(document, defLine, c.name);
             const nameScopes = await getTokenScopesAt(document, defLine, namePos.character);
             const isName = nameScopes?.scopes?.some(scope => scope.includes('entity.name.function'));
