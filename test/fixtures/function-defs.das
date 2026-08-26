@@ -19,3 +19,7 @@ struct Player
     def const operator . controlledByLocalPlayer() {
         return controlledByConnectionId == LOCAL_CONNECTION_ID
     }
+
+def operator + (a : Player; b : Player) : Player
+def operator [] (a : Player; i : int) : int
+def operator ?as Player(v : Variant)

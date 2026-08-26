@@ -1215,7 +1215,7 @@
       "patterns": [
         {
           "name": "meta.function.dascript",
-          "match": "\\b(def)\\s+((?:(?:private|public|abstract|override|static|const|unsafe|sealed)\\s+)*)(operator\\s+(?:[.?]+\\s*)?)?([[:alnum:]_]+)",
+          "match": "\\b(def)\\s+((?:(?:private|public|abstract|override|static|const|unsafe|sealed)\\s+)*)(?:(operator)\\b\\s*([-+*/%=<>!~&|^?.\\[\\]:]*(?:\\b(?:as|is)\\b)?)\\s*)?([[:alnum:]_]+)?",
           "captures": {
             "1": {
               "name": "storage.type.function.dascript"
@@ -1227,6 +1227,9 @@
               "name": "keyword.type.dascript"
             },
             "4": {
+              "name": "keyword.other.operator-overload.dascript"
+            },
+            "5": {
               "name": "entity.name.function.dascript"
             }
           }

@@ -2,7 +2,7 @@
     "name": "dascript",
     "displayName": "daScript",
     "description": "daScript is high-performance statically strong typed scripting language, designed to be high-performance as embeddable ‘scripting’ language for real-time applications (like games).",
-    "version": "0.0.31",
+    "version": "0.0.32",
     "publisher": "eguskov",
     "license": "BSD-3-Clause",
     "icon": "daslang.png",
