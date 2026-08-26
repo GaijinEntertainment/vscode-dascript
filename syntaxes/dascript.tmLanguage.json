@@ -1224,10 +1224,10 @@
               "name": "keyword.type.dascript"
             },
             "3": {
-              "name": "keyword.other.operator-overload.dascript"
+              "name": "keyword.control.operator-overload.dascript"
             },
             "4": {
-              "name": "keyword.other.operator-overload.dascript"
+              "name": "keyword.control.operator-overload.dascript"
             },
             "5": {
               "name": "entity.name.function.dascript"
