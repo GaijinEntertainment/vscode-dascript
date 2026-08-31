@@ -2785,6 +2785,39 @@ suite('daScript Syntax Highlighting Tests', () => {
         console.log('✓ Ternary with piped function calls test passed');
     });
 
+    test('module header should not swallow the following require line', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/module-require.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let requireLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('require engine.core')) {
+                requireLine = i;
+                break;
+            }
+        }
+        assert.ok(requireLine >= 0, 'Should find require engine.core line');
+
+        const reqPos = findInLine(document, requireLine, 'require');
+        const reqScopes = await getTokenScopesAt(document, requireLine, reqPos.character);
+        const reqIsKeyword = reqScopes?.scopes?.some(scope => scope.includes('keyword.control'));
+        const reqNotInModule = !reqScopes?.scopes?.some(scope => scope.includes('meta.module'));
+        assert.ok(reqIsKeyword, `'require' after a module line should be a keyword. Got scopes: ${JSON.stringify(reqScopes?.scopes)}`);
+        assert.ok(reqNotInModule, `'require' line should not be inside meta.module. Got scopes: ${JSON.stringify(reqScopes?.scopes)}`);
+
+        const pathPos = findInLine(document, requireLine, 'engine.core');
+        const pathScopes = await getTokenScopesAt(document, requireLine, pathPos.character);
+        const pathIsModule = pathScopes?.scopes?.some(scope => scope.includes('entity.name.type.module'));
+        assert.ok(pathIsModule, `'engine.core' should be scoped as a module name. Got scopes: ${JSON.stringify(pathScopes?.scopes)}`);
+
+        console.log('✓ module/require header test passed');
+    });
+
     test('Multiple function modifiers should be keywords, not the function name', async () => {
         const uri = vscode.Uri.file(
             path.join(__dirname, '../../test/fixtures/function-defs.das')
