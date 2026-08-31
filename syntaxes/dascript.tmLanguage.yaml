@@ -764,7 +764,7 @@ repository:
       - include: '#literals'
   require_specifier:
     name: meta.require.dascript
-    begin: \b(require)\s+(.+?)\b
+    begin: \b(require)[ \t]+
     beginCaptures:
       1: {name: keyword.control.dascript}
     end: (?=\s|\n|\;)
@@ -772,9 +772,12 @@ repository:
       - include: '#comments'
       - include: '#strings'
       - include: '#literals'
+      - match: '[[:alnum:]_./%]+'
+        name: entity.name.type.module.dascript
   module_specifier:
     name: meta.module.dascript
-    begin: \b(module)\s+([[:alnum:]_]+)\s*(public|private|shared)?\s?(public|private|shared)?
+    # [ \t] only — \s would match the trailing \n and swallow the next line
+    begin: \b(module)[ \t]+([[:alnum:]_]+)[ \t]*(public|private|shared)?[ \t]?(public|private|shared)?
     beginCaptures:
       1: {name: keyword.module.dascript}
       2: {name: entity.name.type.module.dascript}
