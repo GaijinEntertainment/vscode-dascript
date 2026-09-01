@@ -778,8 +778,8 @@ repository:
       - include: '#comments'
       - include: '#strings'
       - include: '#literals'
+      # module path (engine.core, daslib/json_boost) deliberately left unscoped
       - match: '[[:alnum:]_./%]+'
-        name: entity.name.type.module.dascript
   module_specifier:
     name: meta.module.dascript
     # [ \t] only — \s would match the trailing \n and swallow the next line

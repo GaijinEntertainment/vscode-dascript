@@ -2830,8 +2830,8 @@ suite('daScript Syntax Highlighting Tests', () => {
 
         const pathPos = findInLine(document, requireLine, 'engine.core');
         const pathScopes = await getTokenScopesAt(document, requireLine, pathPos.character);
-        const pathIsModule = pathScopes?.scopes?.some(scope => scope.includes('entity.name.type.module'));
-        assert.ok(pathIsModule, `'engine.core' should be scoped as a module name. Got scopes: ${JSON.stringify(pathScopes?.scopes)}`);
+        const pathIsUncolored = !pathScopes?.scopes?.some(scope => scope.includes('entity.name') || scope.includes('keyword') || scope.includes('constant'));
+        assert.ok(pathIsUncolored, `'engine.core' should not be colored. Got scopes: ${JSON.stringify(pathScopes?.scopes)}`);
 
         console.log('✓ module/require header test passed');
     });
