@@ -2358,6 +2358,24 @@ suite('daScript Syntax Highlighting Tests', () => {
         );
         assert.ok(rangeIsType, `'range' in 'var r : range' should still be highlighted as a type. Got scopes: ${JSON.stringify(rangeTypeScopes?.scopes)}`);
 
+        // Test 5: unsigned literal suffixes (0u, 10ul, 0xFFu) are part of the numeric token
+        for (const lit of ['0u', '10ul', '0xFFu']) {
+            let litLine = -1;
+            for (let i = 0; i < document.lineCount; i++) {
+                if (document.lineAt(i).text.includes('= ' + lit)) {
+                    litLine = i;
+                    break;
+                }
+            }
+            assert.ok(litLine >= 0, 'Should find line with ' + lit);
+
+            // Check the scope on the suffix character (last char of the literal)
+            const litPos = findInLine(document, litLine, lit);
+            const suffixScopes = await getTokenScopesAt(document, litLine, litPos.character + lit.length - 1);
+            const suffixIsNumeric = suffixScopes?.scopes?.some(scope => scope.includes('constant.numeric'));
+            assert.ok(suffixIsNumeric, `suffix of '${lit}' should be part of the numeric literal. Got scopes: ${JSON.stringify(suffixScopes?.scopes)}`);
+        }
+
         console.log('✓ Constructor cast types test passed');
     });
 

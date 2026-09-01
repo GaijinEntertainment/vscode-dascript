@@ -59,3 +59,9 @@ def test_range_call()
     for i in range(10)
         pass
     var r : range
+
+// Unsigned literal suffixes are part of the number
+def test_unsigned_literals()
+    let mask = 0u
+    let big = 10ul
+    let flags = 0xFFu
