@@ -103,6 +103,10 @@
           "name": "constant.numeric.integer.hexadecimal.long.dascript"
         },
         {
+          "match": "\\b(?i:(0x\\h+)UL?)",
+          "name": "constant.numeric.integer.hexadecimal.unsigned.dascript"
+        },
+        {
           "match": "\\b(?i:(0x\\h+))",
           "name": "constant.numeric.integer.hexadecimal.dascript"
         },
@@ -149,6 +153,14 @@
         {
           "match": "\\b(\\d+[ui]8)",
           "name": "constant.numeric.integer.unsigned.dascript"
+        },
+        {
+          "match": "\\b(?i:\\d+(?:UL|LU))",
+          "name": "constant.numeric.integer.decimal.unsigned.long.dascript"
+        },
+        {
+          "match": "\\b(?i:\\d+U)",
+          "name": "constant.numeric.integer.decimal.unsigned.dascript"
         },
         {
           "match": "\\b(?i:([1-9]+[0-9]*|0)L)",
