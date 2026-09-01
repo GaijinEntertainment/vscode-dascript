@@ -1598,8 +1598,7 @@
           "include": "#literals"
         },
         {
-          "match": "[[:alnum:]_./%]+",
-          "name": "entity.name.type.module.dascript"
+          "match": "[[:alnum:]_./%]+"
         }
       ]
     },
