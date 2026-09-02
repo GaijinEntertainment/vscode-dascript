@@ -539,6 +539,9 @@
                   "include": "#strings"
                 },
                 {
+                  "include": "#literals"
+                },
+                {
                   "match": "([[:alnum:]_]+)",
                   "name": "string.unquoted.annotation.dascript"
                 }

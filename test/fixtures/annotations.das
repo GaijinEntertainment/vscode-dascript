@@ -19,6 +19,7 @@ struct DataNode {
 class AnnotationsComponent : Component {
     // Basic export annotations
     @export private export_me : int
+    @serialize=false skip_me : int
     @no_export do_not_export_me : float
 
     // View and serialize name annotations with string values
