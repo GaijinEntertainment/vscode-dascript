@@ -2836,6 +2836,33 @@ suite('daScript Syntax Highlighting Tests', () => {
         console.log('✓ module/require header test passed');
     });
 
+    test('Annotation assignment values keep literal scopes', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/annotations.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let annLine = -1;
+        for (let i = 0; i < document.lineCount; i++) {
+            if (document.lineAt(i).text.includes('@serialize=false')) {
+                annLine = i;
+                break;
+            }
+        }
+        assert.ok(annLine >= 0, 'Should find @serialize=false line');
+
+        const valPos = findInLine(document, annLine, 'false');
+        const valScopes = await getTokenScopesAt(document, annLine, valPos.character);
+        const valIsConstant = valScopes?.scopes?.some(scope => scope.includes('constant.language'));
+        const valIsNotString = !valScopes?.scopes?.some(scope => scope.includes('string'));
+        assert.ok(valIsConstant && valIsNotString, `'false' in @serialize=false should be a language constant, not a string. Got scopes: ${JSON.stringify(valScopes?.scopes)}`);
+
+        console.log('✓ Annotation assignment values test passed');
+    });
+
     test('Multiple function modifiers should be keywords, not the function name', async () => {
         const uri = vscode.Uri.file(
             path.join(__dirname, '../../test/fixtures/function-defs.das')
