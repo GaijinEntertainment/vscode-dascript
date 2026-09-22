@@ -36,3 +36,12 @@ typedef
     FunctionWithReturn = function<(data: float; count: uint): string>
     LambdaNoParams = lambda<(): int>
     BlockVoidReturn = block<(id: int64): void>
+
+// Distinct types
+typedef distinct EntityId = int
+typedef distinct Meters = float
+typedef distinct FileHandle = void?
+typedef private distinct Secret = int
+typedef
+    distinct PlayerId = int
+    Score = float
