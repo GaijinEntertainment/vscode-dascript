@@ -810,20 +810,23 @@ repository:
         begin: ^\s*(typedef)\s*$
         beginCaptures:
           1: {name: keyword.type.dascript}
-        end: ^(?!\s+[[:alnum:]_]+\s*=)
+        end: ^(?!\s+(?:distinct\s+)?[[:alnum:]_]+\s*=)
         patterns:
           - name: meta.typedef.type.dascript
-            match: ^\s+([[:alnum:]_]+)\s*(?==)
+            match: ^\s+(?:(distinct)\s+)?([[:alnum:]_]+)\s*(?==)
             captures:
-              1: {name: entity.name.type.dascript}
+              1: {name: keyword.type.dascript}
+              2: {name: entity.name.type.dascript}
           - include: '#generic_types'
           - include: '#builtin_types'
           - include: '#keywords'
       - name: meta.typedef.dascript
-        match: \b(typedef)\s+([[:alnum:]_]+)\s*(?==)
+        match: \b(typedef)\s+(?:(public|private)\s+)?(?:(distinct)\s+)?([[:alnum:]_]+)\s*(?==)
         captures:
           1: {name: keyword.type.dascript}
-          2: {name: entity.name.type.dascript}
+          2: {name: storage.modifier.dascript}
+          3: {name: keyword.type.dascript}
+          4: {name: entity.name.type.dascript}
   template:
     patterns:
       - name: meta.template.function.dascript

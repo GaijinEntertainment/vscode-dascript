@@ -2910,4 +2910,38 @@ suite('daScript Syntax Highlighting Tests', () => {
 
         console.log('✓ Function modifiers test passed');
     });
+
+    test('distinct in typedef should be highlighted like typedef', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/typedef.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const cases = [
+            { line: 'typedef distinct EntityId = int', name: 'EntityId' },
+            { line: 'typedef private distinct Secret = int', name: 'Secret' },
+            { line: '    distinct PlayerId = int', name: 'PlayerId' }
+        ];
+
+        for (const c of cases) {
+            let lineNo = -1;
+            for (let i = 0; i < document.lineCount; i++) {
+                if (document.lineAt(i).text === c.line) { lineNo = i; break; }
+            }
+            assert.ok(lineNo >= 0, `Should find line "${c.line}"`);
+
+            const distinctPos = findInLine(document, lineNo, 'distinct');
+            const distinctScopes = await getTokenScopesAt(document, lineNo, distinctPos.character);
+            assert.ok(distinctScopes?.scopes?.includes('keyword.type.dascript'), `'distinct' should be keyword.type.dascript in "${c.line}". Got scopes: ${JSON.stringify(distinctScopes?.scopes)}`);
+
+            const namePos = findInLine(document, lineNo, c.name);
+            const nameScopes = await getTokenScopesAt(document, lineNo, namePos.character);
+            assert.ok(nameScopes?.scopes?.includes('entity.name.type.dascript'), `'${c.name}' should be the type name in "${c.line}". Got scopes: ${JSON.stringify(nameScopes?.scopes)}`);
+        }
+
+        console.log('✓ Distinct typedef test passed');
+    });
 });
