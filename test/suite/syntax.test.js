@@ -2910,4 +2910,79 @@ suite('daScript Syntax Highlighting Tests', () => {
 
         console.log('✓ Function modifiers test passed');
     });
+
+    test('Array literals and comprehensions should not be annotations', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/array-literals.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const findLine = (text, from = 0) => {
+            for (let i = from; i < document.lineCount; i++) {
+                if (document.lineAt(i).text.includes(text)) {
+                    return i;
+                }
+            }
+            assert.fail(`Should find line containing "${text}"`);
+        };
+        const scopesOf = async (line, text) => {
+            const pos = findInLine(document, line, text);
+            const result = await getTokenScopesAt(document, line, pos.character);
+            return result?.scopes || [];
+        };
+        const has = (scopes, part) => scopes.some(scope => scope.includes(part));
+
+        // Comprehension: 'for' is a keyword, the string closes where it should
+        const forLine = findLine('[for (i in range(STAT_COUNT))');
+        const forScopes = await scopesOf(forLine, 'for');
+        assert.ok(has(forScopes, 'keyword.control') && !has(forScopes, 'annotation'),
+            `'for' in a comprehension should be a keyword, not an annotation. Got scopes: ${JSON.stringify(forScopes)}`);
+        const signedScopes = await scopesOf(forLine, 'signed_text');
+        assert.ok(has(signedScopes, 'meta.interpolation'),
+            `'signed_text' should be inside a string interpolation. Got scopes: ${JSON.stringify(signedScopes)}`);
+        const whereScopes = await scopesOf(forLine, 'where');
+        assert.ok(has(whereScopes, 'keyword.control') && !has(whereScopes, 'string'),
+            `'where' after the string should be a keyword, not a string. Got scopes: ${JSON.stringify(whereScopes)}`);
+
+        const returnLine = findLine('"no stat bonus"', forLine);
+        const returnScopes = await scopesOf(returnLine, 'return');
+        assert.ok(!has(returnScopes, 'string'),
+            `'return' on the next line should not be a string. Got scopes: ${JSON.stringify(returnScopes)}`);
+        const noBonusScopes = await scopesOf(returnLine, 'no stat bonus');
+        assert.ok(has(noBonusScopes, 'string.quoted.double'),
+            `"no stat bonus" should be a string. Got scopes: ${JSON.stringify(noBonusScopes)}`);
+
+        // Array literals starting with a call or an identifier
+        for (const [text, name] of [['[decode_reflection(', 'decode_reflection'], ['[r3 + r0', 'r3']]) {
+            const line = findLine(text);
+            const scopes = await scopesOf(line, name);
+            assert.ok(!has(scopes, 'annotation'),
+                `'${name}' in an array literal should not be an annotation. Got scopes: ${JSON.stringify(scopes)}`);
+        }
+        const afterLine = findLine('let after_arrays');
+        const afterScopes = await scopesOf(afterLine, 'let');
+        assert.ok(!has(afterScopes, 'annotation'),
+            `Code after array literals should not be inside an annotation. Got scopes: ${JSON.stringify(afterScopes)}`);
+
+        // Block annotation after '$' is still an annotation
+        const esLine = findLine('$ [es]');
+        const esScopes = await scopesOf(esLine, 'es]');
+        assert.ok(has(esScopes, 'entity.name.function.annotation'),
+            `'es' after '$' should be an annotation. Got scopes: ${JSON.stringify(esScopes)}`);
+
+        // ']' inside a string argument does not close the annotation
+        const annLine = findLine('[some_annotation(name="x]")]');
+        const annScopes = await scopesOf(annLine, 'some_annotation');
+        assert.ok(has(annScopes, 'entity.name.function.annotation'),
+            `'some_annotation' should be an annotation. Got scopes: ${JSON.stringify(annScopes)}`);
+        const sLine = findLine('let s = "still a string"', annLine);
+        const letScopes = await scopesOf(sLine, 'let');
+        assert.ok(!has(letScopes, 'annotation') && !has(letScopes, 'string'),
+            `Code after the annotation should be plain code. Got scopes: ${JSON.stringify(letScopes)}`);
+
+        console.log('✓ Array literals and comprehensions test passed');
+    });
 });
