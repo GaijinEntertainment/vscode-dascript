@@ -1438,8 +1438,33 @@
           "name": "keyword.operator.ternary.dascript"
         }
       },
-      "end": "(?=\\n|\\;)",
+      "end": "(?=\\n|\\;|[,\\)\\]\\}])",
       "patterns": [
+        {
+          "include": "#ternary_operator_body"
+        }
+      ]
+    },
+    "ternary_operator_body": {
+      "patterns": [
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "#ternary_operator_body"
+            }
+          ]
+        },
+        {
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [
+            {
+              "include": "#ternary_operator_body"
+            }
+          ]
+        },
         {
           "include": "#comments"
         },

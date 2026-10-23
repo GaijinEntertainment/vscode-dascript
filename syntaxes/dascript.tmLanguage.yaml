@@ -704,8 +704,24 @@ repository:
     begin: \?
     beginCaptures:
       0: {name: keyword.operator.ternary.dascript}
-    end: (?=\n|\;)
+    # Ends at the end of the line/statement, or before a ',' or closing
+    # bracket that belongs to the enclosing call, index or block:
+    # f(a ? b : c), [a ? b : c, d], { return a ? b : c }
+    end: (?=\n|\;|[,\)\]\}])
     patterns:
+      - include: '#ternary_operator_body'
+  ternary_operator_body:
+    patterns:
+      # Balanced brackets inside a branch: their ')' / ']' / ',' do not
+      # end the ternary, e.g. a ? (b > 0 ? 1 : -1) * c : d
+      - begin: \(
+        end: \)
+        patterns:
+          - include: '#ternary_operator_body'
+      - begin: \[
+        end: \]
+        patterns:
+          - include: '#ternary_operator_body'
       - include: '#comments'
       - match: ':'
         name: keyword.operator.ternary.dascript

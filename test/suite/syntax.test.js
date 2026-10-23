@@ -2803,6 +2803,63 @@ suite('daScript Syntax Highlighting Tests', () => {
         console.log('✓ Ternary with piped function calls test passed');
     });
 
+    test('Ternary inside call arguments and brackets should end before the closing bracket', async () => {
+        const uri = vscode.Uri.file(
+            path.join(__dirname, '../../test/fixtures/ternary-in-calls.das')
+        );
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const findLine = (text) => {
+            for (let i = 0; i < document.lineCount; i++) {
+                if (document.lineAt(i).text.includes(text)) {
+                    return i;
+                }
+            }
+            assert.fail(`Should find line containing "${text}"`);
+        };
+        const scopesOf = async (line, text, offset = 0) => {
+            const pos = findInLine(document, line, text);
+            const result = await getTokenScopesAt(document, line, pos.character + offset);
+            return result?.scopes || [];
+        };
+        const has = (scopes, part) => scopes.some(scope => scope.includes(part));
+
+        // The ')' of pick(...) closes the call, not the ternary
+        const callLine = findLine('pick(g ? b : c)');
+        const closeScopes = await scopesOf(callLine, 'c)', 1);
+        assert.ok(has(closeScopes, 'punctuation.definition.arguments.end') && !has(closeScopes, 'meta.ternary'),
+            `')' after a ternary argument should close the call. Got scopes: ${JSON.stringify(closeScopes)}`);
+
+        // Argument after the ternary is outside it
+        const argsLine = findLine('foo(a ? b : c, d)');
+        const dScopes = await scopesOf(argsLine, 'd)');
+        assert.ok(!has(dScopes, 'meta.ternary'),
+            `'d' after the ternary argument should not be inside the ternary. Got scopes: ${JSON.stringify(dScopes)}`);
+
+        // Brackets inside a branch keep the ternary open
+        const groupsLine = findLine('* TWO_PI : arr[i]');
+        const twoPiScopes = await scopesOf(groupsLine, 'TWO_PI :');
+        assert.ok(has(twoPiScopes, 'meta.ternary'),
+            `'TWO_PI' after a parenthesized group should still be inside the ternary. Got scopes: ${JSON.stringify(twoPiScopes)}`);
+
+        // Code after each case is not inside a call or a ternary
+        for (const text of ['let after_call', 'let after_args', 'let after_array', 'let after_block', 'let after_groups']) {
+            const line = findLine(text);
+            const scopes = await scopesOf(line, 'let');
+            assert.ok(has(scopes, 'storage.modifier') && !has(scopes, 'meta.function-call') && !has(scopes, 'meta.ternary'),
+                `'let' in "${text}" should be plain code. Got scopes: ${JSON.stringify(scopes)}`);
+        }
+        const strLine = findLine('let after_call');
+        const strScopes = await scopesOf(strLine, 'still a string');
+        assert.ok(has(strScopes, 'string.quoted.double') && !has(strScopes, 'meta.function-call'),
+            `String after the call should be a plain string. Got scopes: ${JSON.stringify(strScopes)}`);
+
+        console.log('✓ Ternary inside call arguments test passed');
+    });
+
     test('module header should not swallow the following require line', async () => {
         const uri = vscode.Uri.file(
             path.join(__dirname, '../../test/fixtures/module-require.das')
