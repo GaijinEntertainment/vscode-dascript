@@ -449,7 +449,7 @@
       "patterns": [
         {
           "name": "meta.annotation.structure.dascript",
-          "begin": "(?<![[:alnum:]_\\]\\)\\[\\(])\\[(?!\\[)(?=\\s*[[:alpha:]_])",
+          "begin": "(?:^[ \\t]*|(?<=[$@])[ \\t]*)(\\[)(?!\\[)(?!\\s*for\\b)(?=\\s*[[:alpha:]_])",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.annotation.begin.dascript"
@@ -462,6 +462,12 @@
             }
           },
           "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#strings"
+            },
             {
               "name": "meta.annotation.call.dascript",
               "begin": "\\b([[:alpha:]_][[:alnum:]_]*)\\s*(\\()",

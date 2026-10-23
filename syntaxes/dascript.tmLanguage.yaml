@@ -207,14 +207,20 @@ repository:
       # Don't match array indexing: arr[0], tm[index], matrix[row][col]
       # Don't match array literals: [[tuple<...>]]
       # Don't match named parameter blocks: fn([arg=val])
+      # Don't match comprehensions: [for (x in xs); x]
+      # Annotations start a line or follow a block/lambda sigil ($ [es], @ [ann]);
+      # '[name' elsewhere in an expression is an array literal: let a <- [f(x), g(y)]
       - name: meta.annotation.structure.dascript
-        begin: (?<![[:alnum:]_\]\)\[\(])\[(?!\[)(?=\s*[[:alpha:]_])
+        begin: (?:^[ \t]*|(?<=[$@])[ \t]*)(\[)(?!\[)(?!\s*for\b)(?=\s*[[:alpha:]_])
         beginCaptures:
           1: {name: punctuation.definition.annotation.begin.dascript}
         end: \]
         endCaptures:
           0: {name: punctuation.definition.annotation.end.dascript}
         patterns:
+          # A ']' inside a string or comment does not close the annotation
+          - include: '#comments'
+          - include: '#strings'
           # Annotation with arguments: [annotation(arg1, arg2)]
           - name: meta.annotation.call.dascript
             begin: \b([[:alpha:]_][[:alnum:]_]*)\s*(\()
